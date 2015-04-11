@@ -128,7 +128,7 @@ class Portfolio(object):
     def __str__(self):
         out = "BALANCE = " + str(self.balance)
         for symbol in SYMBOLS:
-            out += symbol + ' = ' + str(self.positions[symbol])
+            out += symbol + ' = ' + str(self.positions[symbol]) + ', '
         return out
 
     def __repr__(self):
