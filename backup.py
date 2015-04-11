@@ -267,6 +267,7 @@ class mysocket(object):
             self.sock = sock
         self.buf = ""
         self.log = []
+        self.sock.setblocking(0)
 
     def connect(self, host, port):
         self.sock.connect((host, port))
