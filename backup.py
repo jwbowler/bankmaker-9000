@@ -283,6 +283,9 @@ class mysocket(object):
             self.log.extend(data.split('\n'))
             print self.log
 
+    def get_next(self):
+        return self.log.pop(0)
+
 def jsonify(p):
     return json.dumps(p) + '\n'
 
@@ -356,13 +359,13 @@ if __name__ == '__main__':
             portfolio.handle_out(message)
 
 
-    while True:
-        # block until received message, and un-JSONify it
-        #message = s.get_next()
-        message = None
-        handle(message)
-        # strategy.step()
-#	pass
+#     while True:
+#         # block until received message, and un-JSONify it
+#         #message = s.get_next()
+#         message = None
+#         handle(message)
+#         # strategy.step()
+# #	pass
 
     #listen for book updates...
     # if "type" == "book", put this JSON object in a "book" variable (analogous for "trade" type)
@@ -370,6 +373,6 @@ if __name__ == '__main__':
     portfolio.buy("BAR", 100, 100)
     portfolio.cancel(0)
 
-    time.sleep(0.1)
-    s.recv()
+    t = Thread(target=s.recv)
+    t.start()
 
