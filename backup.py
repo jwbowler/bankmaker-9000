@@ -310,6 +310,7 @@ if __name__ == '__main__':
     portfolio.buy("BAR", 100, 100)
     portfolio.cancel(0)
 
+    time.sleep(1)
 
     s.recv()
 
