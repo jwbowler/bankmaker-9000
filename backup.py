@@ -113,10 +113,13 @@ class Market(object):
         self.is_open = False
 
     def __str__(self):
-        if len(stock.best_bids) > 0 and len(stock.best_asks) > 0:
-            return '%r\n' % {stock.symbol: (stock.best_bids[-1], stock.best_asks[-1]) for stock in self.stocks}
-        else:
-            return '\n'
+	out = ''
+        for symbol in self.stocks:
+            if len(self.stocks[symbol].best_bids) > 0 and len(self.stocks[symbol].best_asks) > 0:
+                out += symbol + ": (" + str(self.stocks[symbol].best_bids[-1][0]) + ", " + str(self.stocks[symbol].best_asks[-1][0]) + ")\n"
+            else:
+                out += symbol + ":\n"
+        return out
 
     def update(self, book_message):
         symbol = book_message['symbol']
