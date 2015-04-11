@@ -363,7 +363,9 @@ def send_hello(): #MUST ISSUE FIRST!!
 
 
 
-if __name__ == '__main__':
+
+
+def setup():
 
     TEST = True
     TEST_INDEX = 0 # 0 = slow, 1 = normal, 2 = empty market
@@ -427,6 +429,9 @@ if __name__ == '__main__':
             print "OUT:", message
             portfolio.handle_out(message)
 
+
+
+if __name__ == '__main__':
 
 
 #         # strategy.step()
