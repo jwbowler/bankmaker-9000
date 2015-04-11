@@ -85,9 +85,9 @@ class Portfolio:
         request = jsonify({\
                 "type": "hello", \
                 "team": TEAM_NAME })
-        mysocket.mysend(request)
+        s.mysend(request)
         print "Sent request"
-        res = mysocket.myreceive(BUFFER_SIZE)
+        res = s.myreceive(BUFFER_SIZE)
         print "Response:", res
         return res
     
@@ -101,8 +101,8 @@ class Portfolio:
             "price": price, \
             "size": size})
         self.numrequests += 1
-        mysocket.mysend(request)
-        return mysocket.myreceive(json.loads(BUFFER_SIZE))
+        s.mysend(request)
+        return s.myreceive(json.loads(BUFFER_SIZE))
             
         
     def sell(self, symbol, price, size):
@@ -114,8 +114,8 @@ class Portfolio:
             "price": price, \
             "size": size})
         self.numrequests += 1
-        mysocket.mysend(request)
-        return mysocket.myreceive(json.loads(BUFFER_SIZE))
+        s.mysend(request)
+        return s.myreceive(json.loads(BUFFER_SIZE))
     
     def convert(self, dir, size):
         request = jsonify({\
@@ -125,8 +125,8 @@ class Portfolio:
             "dir": dir, \
             "size": size})
         self.numrequests += 1
-        mysocket.mysend(request)
-        return mysocket.myreceive(json.loads(BUFFER_SIZE))
+        s.mysend(request)
+        return s.myreceive(json.loads(BUFFER_SIZE))
         
       # fixed cost of 100 per conversion (regardless of size)
       # one CORGE = 0.3 FOO + 0.8 BAR
@@ -136,8 +136,8 @@ class Portfolio:
         request = jsonify({\
             "type": "cancel", \
             "order_id": order_id})
-        mysocket.mysend(request)
-        mysocket.myreceive(json.loads(BUFFER_SIZE))
+        s.mysend(request)
+        s.myreceive(json.loads(BUFFER_SIZE))
       # returns OUT even if order_id is invalid
 
         
