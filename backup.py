@@ -117,7 +117,7 @@ class Portfolio(object):
         self.counter = 0
         self.pending_orders = {}
 
-    def recv_hello(hello_message)
+    def recv_hello(hello_message):
         self.balance = hello_message['cash']
         self.positions = {symbol: hello_message['symbols'][symbol] for symbol in SYMBOLS}
         self.received_hello = True
