@@ -374,7 +374,7 @@ if __name__ == '__main__':
         t = message['type']
         if t == 'hello':
             print message
-        portfolio.recv_hello(message)
+            portfolio.recv_hello(message)
 
         if t == 'market_open':
             market.is_open = message['open']
@@ -389,11 +389,11 @@ if __name__ == '__main__':
             market.update(message)
 
         if t == 'ack':
-        print "ACK:", message
+            print "ACK:", message
             portfolio.handle_ack(message)
 
         if t == 'reject':
-        print "REJECT:", message
+            print "REJECT:", message
             portfolio.handle_reject(message)
 
         if t == 'fill':
@@ -402,7 +402,7 @@ if __name__ == '__main__':
 
         if t == 'out':
             print "OUT:", message
-        portfolio.handle_out(message)
+            portfolio.handle_out(message)
 
 
 
