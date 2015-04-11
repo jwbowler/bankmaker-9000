@@ -126,9 +126,13 @@ class Portfolio(object):
         self.pending_orders = {}
 
     def __str__(self):
-        out = "BALANCE = " + self.balance
+        out = "BALANCE = " + str(self.balance)
         for symbol in SYMBOLS:
-            out += symbol + ' = ' + self.positions[symbol]
+            out += symbol + ' = ' + str(self.positions[symbol])
+        return out
+
+    def __repr__(self):
+        return self.__str__()
 
     def recv_hello(self, hello_message):
         self.balance = hello_message['cash']
