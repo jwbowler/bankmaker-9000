@@ -194,7 +194,7 @@ if __name__ == '__main__':
     else:
         TCP_IP = 'real exchange ip'
     TCP_PORT = 25000 + TEST_INDEX
-    BUFFER_SIZE = 1024
+    BUFFER_SIZE = 4096
     
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((TCP_IP, TCP_PORT))
