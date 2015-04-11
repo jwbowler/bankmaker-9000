@@ -133,7 +133,28 @@ class Portfolio(object):
 
     def handle_ack(self, message):
         order_id = message['order_id']
-        self.pending_orders[order_id].handle_ack()
+        order = self.pending_orders[order_id]
+        order.handle_ack()
+
+        # sorry...
+        if isinstance(order, ConvertOrder):
+            self.balance -= 100
+            if order.direction == 'BUY':
+                self.positions['CORGE'] += order.size
+                self.positions['FOO'] -= order.size * 3/10
+                self.positions['BAR'] -= order.size * 8/10
+            elif order.direction == 'SELL':
+                self.positions['CORGE'] -= order.size
+                self.positions['FOO'] += order.size * 3/10
+                self.positions['BAR'] += order.size * 8/10
+            else:
+                assert False
+
+        elif isinstance(order, TradeOrder):
+            pass
+        else:
+            assert False
+
 
     def handle_reject(self, message):
         order_id = message['order_id']
@@ -177,6 +198,8 @@ class Portfolio(object):
         #return json.loads(s.recv())
 
     def convert(self, direction, size):
+        assert size % 10 == 0
+
         order_id = self.counter
         order = ConvertOrder(order_id, direction, size)
         self.pending_orders[order_id] = order
