@@ -87,7 +87,7 @@ class Portfolio:
                 "team": TEAM_NAME })
         s.send(request)
         print "Sent request"
-        res = json.loads(s.recv(BUFFER_SIZE))
+        res = json.loads(s.recv())
         print "Response:", res
         return res
     
@@ -102,7 +102,7 @@ class Portfolio:
             "size": size})
         self.numrequests += 1
         s.send(request)
-        return json.loads(s.recv(BUFFER_SIZE))
+        return json.loads(s.recv())
             
         
     def sell(self, symbol, price, size):
@@ -115,7 +115,7 @@ class Portfolio:
             "size": size})
         self.numrequests += 1
         s.send(request)
-        return json.loads(s.recv(BUFFER_SIZE))
+        return json.loads(s.recv())
     
     def convert(self, dir, size):
         request = json.dumps({\
@@ -126,7 +126,7 @@ class Portfolio:
             "size": size})
         self.numrequests += 1
         s.send(request)
-        return json.loads(s.recv(BUFFER_SIZE))
+        return json.loads(s.recv())
         
       # fixed cost of 100 per conversion (regardless of size)
       # one CORGE = 0.3 FOO + 0.8 BAR
@@ -137,7 +137,7 @@ class Portfolio:
             "type": "cancel", \
             "order_id": order_id})
         s.send(request)
-        json.loads(s.recv(BUFFER_SIZE))
+        json.loads(s.recv())
       # returns OUT even if order_id is invalid
 
         
@@ -186,41 +186,37 @@ def handle(message):
         
 
 
-# class mysocket:
-#     '''demonstration class only
-#       - coded for clarity, not efficiency
-#     '''
+class mysocket:
 
-#     def __init__(self, sock=None):
-#         if sock is None:
-#             self.sock = socket.socket(
-#                 socket.AF_INET, socket.SOCK_STREAM)
-#         else:
-#             self.sock = sock
+    def __init__(self, sock=None):
+        if sock is None:
+            self.sock = socket.socket(
+                socket.AF_INET, socket.SOCK_STREAM)
+        else:
+            self.sock = sock
+        self.buf = ""
 
-#     def connect(self, host, port):
-#         self.sock.connect((host, port))
+    def connect(self, host, port):
+        self.sock.connect((host, port))
 
-#     def mysend(self, msg):
-#         totalsent = 0
-#         while totalsent < len(msg):
-#             sent = self.sock.send(msg[totalsent:])
-#             if sent == 0:
-#                 raise RuntimeError("socket connection broken")
-#             totalsent = totalsent + sent
+    def send(self, msg):
+        self.sock.send(msg)
 
-#     def myreceive(self):
-#         chunks = []
-#         bytes_recd = 0
-#         while True:
-#             chunk = self.sock.recv(min(len(msg) - bytes_recd, 2048))
-#             if chunk == '':
-#                 raise RuntimeError("socket connection broken")
-#             chunks.append(chunk)
-#             bytes_recd = bytes_recd + len(chunk)
-#             if '}' in chunk:
-#                 break
-#         return ''.join(chunks)
+    def recv(self):
+        data = ''
+        message = ''
+        while True:
+          data += self.sock.recv(BUFFER_SIZE)
+          if not data:
+            break
+          self.buf += data
+          if '\n' not in self.buf:
+            message += self.buf
+            self.buf = ''
+          else:
+            message, self.buf = self.buf.split('\n', 1)
+            return message
+        
 
 def jsonify(p):
     return json.dumps(p) + '\n'
@@ -236,8 +232,8 @@ if __name__ == '__main__':
     TCP_PORT = 25000 + TEST_INDEX
     BUFFER_SIZE = 4096
     
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect((TCP_IP, TCP_PORT))
+    s = mysocket()
+    s.connect(TCP_IP, TCP_PORT)
     
     # s.close() at some point
     

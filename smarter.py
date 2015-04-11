@@ -18,7 +18,7 @@ class mysocket:
 
     def myreceive(self):
         data = ''
-	message = ''
+        message = ''
         while True:
           data += self.sock.recv(1024)
           if not data:
