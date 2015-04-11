@@ -220,19 +220,11 @@ class mysocket:
 
     def recv(self):
         data = ''
-        message = ''
         while True:
             data += self.sock.recv(BUFFER_SIZE)
             # if not data:
             #   break
-            self.buf += data
-            if '\n' not in self.buf:
-                message += self.buf
-                self.buf = ''
-            else:
-                messages = self.buf.split('\n')
-                self.buf = messages.pop(-1)
-                self.log.extend(messages)
+            self.log.extend(data.split('\n'))
             print self.log
 
 def jsonify(p):
@@ -321,4 +313,4 @@ if __name__ == '__main__':
     send_hello()
     portfolio.buy("CORGE", 100, 100)
     portfolio.convert("FOO", "SELL", 10)
-    
+
