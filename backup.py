@@ -119,7 +119,8 @@ class Portfolio(object):
 
     def recv_hello(self, hello_message):
         self.balance = hello_message['cash']
-        self.positions = {symbol: hello_message['symbols'][symbol] for symbol in SYMBOLS}
+        syms = hello_message['symbols']
+        self.positions = {sym['symbol']: sym['position'] for sym in syms}
         self.received_hello = True
 
     def handle_ack(self, message):
