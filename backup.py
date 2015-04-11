@@ -335,7 +335,7 @@ if __name__ == '__main__':
         t = message['type']
 
         print 'Handling:'
-        print message
+        print t, message
 
         if t == 'hello':
             portfolio.recv_hello(message)
