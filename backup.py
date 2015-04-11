@@ -167,7 +167,7 @@ class Portfolio(object):
                 self.positions['BAR'] += order.size * 8/10
             else:
                 assert False
-
+            del self.pending_orders[order_id]
         elif isinstance(order, TradeOrder):
             pass
         else:
@@ -245,6 +245,9 @@ class Order(object):
         # possible states: CREATED, ACKED, CANCELLING
         self.state = 'CREATED'
 
+    def __repr__(self):
+        return self.__str__()
+
     def handle_ack(self):
         self.state = 'ACKED'
 
@@ -259,6 +262,9 @@ class TradeOrder(Order):
         self.direction = direction
         self.price = price
         self.size = size
+
+    def __str__(self):
+        return self.symbol
 
     def get_json_request(self):
         request = jsonify({
@@ -298,10 +304,8 @@ class Strategy(object):
         barAsk = bar.best_asks[-1]
         barBid = bar.best_bids[-1]
 
-        num_pending = self.portfolio.pending_orders
-        assert len(num_pending) <= 3
-
-        print num_pending
+        num_pending = len(self.portfolio.pending_orders)
+        assert num_pending <= 4
         if num_pending > 0:
             return
 
@@ -331,6 +335,9 @@ class ConvertOrder(Order):
         self.symbol = 'CORGE'
         self.direction = direction
         self.size = size
+
+    def __str__(self):
+        return "CONVERT"
 
     def get_json_request(self):
         request = jsonify({
@@ -366,6 +373,9 @@ class mysocket(object):
         self.sock.send(msg)
 
     def get_next(self):
+        res = ''
+        if len(self.log) > 0:
+            res = json.loads(self.log.pop(0))
         try:
             data = self.sock.recv(BUFFER_SIZE)
             if not data:
@@ -379,7 +389,8 @@ class mysocket(object):
         else:
             self.log.extend(data.strip().split('\n'))
             #print self.log
-            return json.loads(self.log.pop(0))
+        finally:
+            return res
 
 def jsonify(p):
     return json.dumps(p) + '\n'
@@ -434,6 +445,7 @@ if __name__ == '__main__':
             market.is_open = message['open']
 
         if t == 'error':
+            print message
             assert False
 
         if t == 'book':
@@ -461,7 +473,6 @@ if __name__ == '__main__':
 
 
     # print market
-
 
 #         # strategy.step()
 # #	pass
