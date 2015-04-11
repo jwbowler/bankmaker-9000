@@ -278,34 +278,25 @@ class mysocket(object):
         print "Sending: ", msg
         self.sock.send(msg)
 
-    def recv(self):
-        data = ''
-        while True:
-            try:
-                data += self.sock.recv(BUFFER_SIZE)
-                # if not data:
-                #   break
-            except socket.error, e:
-                err = e.args[0]
-                if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
-                    sleep(1)
-                    print 'No data available'
-                    continue
-                else:
-                    # a "real" error occurred
-                    print e
-                    sys.exit(1)
-            else:
-                self.log.extend(data.split('\n'))
-                print self.log
-
     def get_next(self):
-
-        data = self.sock.recv(BUFFER_SIZE)
-        # if not data:
-        #   break
-        self.log.extend(data.split('\n'))
-        return json.loads(self.log.pop(0))
+        try:
+            data += self.sock.recv(BUFFER_SIZE)
+            # if not data:
+            #   break
+        except socket.error, e:
+            err = e.args[0]
+            if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
+                sleep(1)
+                print 'No data available'
+                continue
+            else:
+                # a "real" error occurred
+                print e
+                sys.exit(1)
+        else:
+            self.log.extend(data.split('\n'))
+            #print self.log
+            return json.loads(self.log.pop(0))
 
 def jsonify(p):
     return json.dumps(p) + '\n'
