@@ -261,6 +261,7 @@ class TradeOrder(Order):
             "size": self.size})
         return request
 
+
 class Strategy(object):
     def __init__(self, market, portfolio):
         self.market = market
@@ -294,25 +295,25 @@ class Strategy(object):
         if num_pending > 0:
             return
 
-        if corgeBid[0]-(0.3*fooAsk[0]+0.8*barAsk[0])>cost:
+        if corgeBid[0] - (0.3*fooAsk[0]+0.8*barAsk[0])>cost:
 
             num = min(fooAsk[1]/0.3, barAsk[1]/0.8, corgeBid[1])
             num = int(num / 10) * 10
 
-            self.portfolio.buy('CORGE', corgeBid[0], num)
-            self.portfolio.convert('SELL', num)
-            self.portfolio.sell('FOO', fooAsk[0], num*3/10)
-            self.portfolio.sell('BAR', barAsk[0], num*8/10)
+            self.portfolio.sell('CORGE', corgeBid[0], num)
+            self.portfolio.convert('BUY', num)
+            self.portfolio.buy('FOO', fooAsk[0], num*3/10)
+            self.portfolio.buy('BAR', barAsk[0], num*8/10)
 
-        elif corgeAsk[0]-(0.3*fooBid[0]+0.8*barBid[0])>cost:
+        elif (0.3*fooBid[0]+0.8*barBid[0]) - corgeAsk[0] > cost:
 
             num = min(fooBid[1]/0.3, barBid[1]/0.8, corgeAsk[1])
             num = int(num / 10) * 10
 
-            self.portfolio.sell('CORGE', corgeAsk[0], num)
-            self.portfolio.convert('BUY', num)
-            self.portfolio.buy('FOO', fooBid[0], num*3/10)
-            self.portfolio.buy('BAR', barBid[0], num*8/10)
+            self.portfolio.buy('CORGE', corgeAsk[0], num)
+            self.portfolio.convert('SELL', num)
+            self.portfolio.sell('FOO', fooBid[0], num*3/10)
+            self.portfolio.sell('BAR', barBid[0], num*8/10)
 
 class ConvertOrder(Order):
     def __init__(self, order_id, direction, size):
