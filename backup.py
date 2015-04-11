@@ -482,7 +482,7 @@ if __name__ == '__main__':
     #listen for book updates...
     # if "type" == "book", put this JSON object in a "book" variable (analogous for "trade" type)
     send_hello()
-    portfolio.sell("BAR", 3000, 10)
+    # portfolio.sell("BAR", 3000, 10)
     #portfolio.cancel(0)
 
     while True:
