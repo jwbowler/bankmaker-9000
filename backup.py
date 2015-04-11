@@ -1,7 +1,7 @@
 import time
 import json
 import socket
-
+from threading import Thread
 
 
 class Book:
@@ -113,8 +113,6 @@ class Portfolio:
         id = ack_message['order_id']
         self.pending_orders[id].handle_ack(ack_message)
 
-
-
     def buy(self, symbol, price, size):
         request = jsonify({\
             "type": "add", \
@@ -125,11 +123,6 @@ class Portfolio:
             "size": size})
         self.numrequests += 1
         s.send(request)
-        print request
-	res = json.loads(s.recv())
-        print s.buf
-	return res
-            
         
     def sell(self, symbol, price, size):
         request = jsonify({\
@@ -141,18 +134,16 @@ class Portfolio:
             "size": size})
         self.numrequests += 1
         s.send(request)
-        return json.loads(s.recv())
     
-    def convert(self, dir, size):
+    def convert(self, direction, size):
         request = jsonify({\
             "type": "convert", \
             "order_id": self.numrequests, \
             "symbol": "CORGE", \
-            "dir": dir, \
+            "dir": direction, \
             "size": size})
         self.numrequests += 1
         s.send(request)
-        return json.loads(s.recv())
         
       # fixed cost of 100 per conversion (regardless of size)
       # one CORGE = 0.3 FOO + 0.8 BAR
@@ -163,7 +154,6 @@ class Portfolio:
             "type": "cancel", \
             "order_id": order_id})
         s.send(request)
-        json.loads(s.recv())
       # returns OUT even if order_id is invalid
 
 
@@ -197,9 +187,6 @@ class Order:
 def calc_pnl(portfolio, stocks):
     return portfolio.balance + sum([stock.get_liquidated_value() for stock in stocks])
 
-
-
-
 class mysocket:
 
     def __init__(self, sock=None):
@@ -209,11 +196,13 @@ class mysocket:
         else:
             self.sock = sock
         self.buf = ""
+        self.log = []
 
     def connect(self, host, port):
         self.sock.connect((host, port))
 
     def send(self, msg):
+        print "Sending: ", msg
         self.sock.send(msg)
 
     def recv(self):
@@ -228,9 +217,10 @@ class mysocket:
             message += self.buf
             self.buf = ''
           else:
-            message, self.buf = self.buf.split('\n', 1)
-            return message
-        
+            messages = self.buf.split('\n')
+            self.buf = messages.pop(-1)
+            self.log.extend(messages)
+            print self.log
 
 def jsonify(p):
     return json.dumps(p) + '\n'
@@ -260,6 +250,9 @@ if __name__ == '__main__':
     BUFFER_SIZE = 4096
     s = mysocket()
     s.connect(TCP_IP, TCP_PORT)
+
+    t = Thread(target = s.recv)
+    t.start()
     
     # s.close() at some point
 
