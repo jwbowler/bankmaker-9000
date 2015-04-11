@@ -231,7 +231,7 @@ if __name__ == '__main__':
     BUFFER_SIZE = 1024
     
     s = mysocket()
-    s.connect((TCP_IP, TCP_PORT))
+    s.connect(TCP_IP, TCP_PORT)
     
     # s.close() at some point
     
