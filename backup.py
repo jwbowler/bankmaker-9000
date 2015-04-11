@@ -262,6 +262,51 @@ class TradeOrder(Order):
         return request
 
 
+
+
+class Strategy2(object):
+    def __init__(self, market, portfolio):
+        self.market = market
+        self.portfolio = portfolio
+
+    def step(self):
+        corge = self.market.stocks['CORGE']
+        foo = self.market.stocks['FOO']
+        bar = self.market.stocks['BAR']
+
+        corgeAsk = corge.best_asks
+        corgeBid = corge.best_bids
+        fooAsk = foo.best_asks
+        fooBid = foo.best_bids
+        barAsk = bar.best_asks
+        barBid = bar.best_bids
+        if not all([len(x) > 0 for x in [corgeAsk, corgeBid, fooAsk, fooBid, barAsk, barBid]]):
+            return
+
+        corgeAsk = corge.best_asks[-1]
+        corgeBid = corge.best_bids[-1]
+        fooAsk = foo.best_asks[-1]
+        fooBid = foo.best_bids[-1]
+        barAsk = bar.best_asks[-1]
+        barBid = bar.best_bids[-1]
+
+
+        num_pending = self.portfolio.pending_orders
+        assert len(num_pending) <= 1
+
+        if num_pending > 0:
+            return
+
+        size = 10
+
+        if corgeBid[0] - (0.3*fooAsk[0]+0.8*barAsk[0])>cost:
+            self.portfolio.sell('CORGE', corgeBid[0], size)
+
+        elif (0.3*fooBid[0]+0.8*barBid[0]) - corgeAsk[0] > cost:
+            self.portfolio.buy('CORGE', corgeAsk[0], size)
+
+
+
 class Strategy(object):
     def __init__(self, market, portfolio):
         self.market = market
