@@ -109,7 +109,7 @@ class Stock(object):
 class Market(object):
 
     def __init__(self, symbols):
-        self.stocks = {symbol: Stock(symbol) for symbol in SYMBOLS}
+        self.stocks = {symbol: Stock(symbol) for symbol in symbols}
         self.is_open = False
 
     def update(self, book_message):
@@ -362,7 +362,6 @@ if __name__ == '__main__':
     portfolio = Portfolio()
 
     market = Market(SYMBOLS)
-    portfolio = Portfolio()
     strategy = Strategy(market, portfolio)
 
     def handle(message):
