@@ -112,6 +112,15 @@ class Market(object):
         self.stocks = {symbol: Stock(symbol) for symbol in symbols}
         self.is_open = False
 
+    def __str__(self):
+	out = ''
+        for symbol in self.stocks:
+            if len(self.stocks[symbol].best_bids) > 0 and len(self.stocks[symbol].best_asks) > 0:
+                out += symbol + ": (" + str(self.stocks[symbol].best_bids[-1][0]) + ", " + str(self.stocks[symbol].best_asks[-1][0]) + ")\n"
+            else:
+                out += symbol + ":\n"
+        return out
+
     def update(self, book_message):
         symbol = book_message['symbol']
         self.stocks[symbol].update(book_message)
@@ -450,7 +459,7 @@ if __name__ == '__main__':
 
 
 
-        print portfolio
+        print market
 
 
 #         # strategy.step()
