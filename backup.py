@@ -120,12 +120,10 @@ class Market(object):
 
 class Portfolio(object):
 
-    def __init__(self, socket):
+    def __init__(self):
         self.received_hello = False
         self.counter = 0
         self.pending_orders = {}
-
-        self.socket = socket
 
     def recv_hello(self, hello_message):
         self.balance = hello_message['cash']
@@ -185,7 +183,7 @@ class Portfolio(object):
 
         request = order.get_json_request()
         self.counter += 1
-        self.socket.send(request)
+        s.send(request)
         #res = json.loads(s.recv())
         #print s.buf
         #return res
@@ -208,7 +206,7 @@ class Portfolio(object):
 
         request = order.get_json_request()
         self.counter += 1
-        self.socket.send(request)
+        s.send(request)
         #return json.loads(s.recv())
         return order_id
 
@@ -221,7 +219,7 @@ class Portfolio(object):
         request = jsonify({
             "type": "cancel",
             "order_id": order_id})
-        self.socket.send(request)
+        s.send(request)
       # returns OUT even if order_id is invalid
 
 
@@ -392,7 +390,7 @@ def send_hello(): #MUST ISSUE FIRST!!
     request = jsonify({\
                        "type": "hello", \
                        "team": "BANKMAKERS" })
-    self.socket.send(request)
+    s.send(request)
 
 
 
@@ -416,7 +414,7 @@ if __name__ == '__main__':
     SYMBOLS = ['FOO', 'BAR', 'BAZ', 'QUUX', 'CORGE']
 
     stocks = [Stock(symbol) for symbol in SYMBOLS]
-    portfolio = Portfolio(s)
+    portfolio = Portfolio()
 
     market = Market(SYMBOLS)
     strategy = Strategy(market, portfolio)
