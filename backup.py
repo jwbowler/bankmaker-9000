@@ -186,6 +186,7 @@ def handle(message):
         
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 # class mysocket:
 #     '''demonstration class only
@@ -222,6 +223,8 @@ def handle(message):
 #             if '}' in chunk:
 #                 break
 #         return ''.join(chunks)
+=======
+>>>>>>> parent of d8d8eb7... working hello! needs to read more from buffer
 =======
 >>>>>>> parent of d8d8eb7... working hello! needs to read more from buffer
 
