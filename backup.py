@@ -80,17 +80,20 @@ class Portfolio:
         self.numrequests = 0
         
         
-    def hello(): #MUST ISSUE FIRST!!
+    def hello(self): #MUST ISSUE FIRST!!
     
-        request = json.dumps({\
+        request = jsonify({\
             "type": "hello", \
             "team": TEAM_NAME })
         s.send(request)
-        return json.loads(s.recv(BUFFER_SIZE))
+        print "Sent request"
+	res = s.recv(BUFFER_SIZE)
+	print "Response:", res
+	return res
     
     
-    def buy(symbol, price, size): 
-        request = json.dumps({\
+    def buy(self, symbol, price, size): 
+        request = jsonify({\
             "type": "add", \
             "order_id": self.numrequests, \
             "symbol": symbol, \
@@ -102,8 +105,8 @@ class Portfolio:
         return s.recv(json.loads(BUFFER_SIZE))
             
         
-    def sell(symbol, price, size):
-        request = json.dumps({\
+    def sell(self, symbol, price, size):
+        request = jsonify({\
             "type": "add", \
             "order_id": self.numrequests, \
             "symbol": symbol, \
@@ -114,8 +117,8 @@ class Portfolio:
         s.send(request)
         return s.recv(json.loads(BUFFER_SIZE))
     
-    def convert(dir, size):
-        request = json.dumps({\
+    def convert(self, dir, size):
+        request = jsonify({\
             "type": "convert", \
             "order_id": self.numrequests, \
             "symbol": "CORGE", \
@@ -129,8 +132,8 @@ class Portfolio:
       # one CORGE = 0.3 FOO + 0.8 BAR
       # returns ACK or REJECT
     
-    def cancel(order_id):
-        request = json.dumps({\
+    def cancel(self, order_id):
+        request = jsonify({\
             "type": "cancel", \
             "order_id": order_id})
         s.send(request)
@@ -148,8 +151,6 @@ class Trade:
 
 def calc_pnl(portfolio, stocks):
     return portfolio.balance + sum([stock.get_liquidated_value() for stock in stocks])
-        
-        
         
 def handle(message):
     t = message['type']
@@ -181,7 +182,8 @@ def handle(message):
     if t == 'out':
         pass
         
-
+def jsonify(p):
+    return json.dumps(p) + '\n'
 
 if __name__ == '__main__':
     
@@ -205,6 +207,7 @@ if __name__ == '__main__':
     stocks = [Stock(symbol) for symbol in SYMBOLS]
     portfolio = Portfolio(SYMBOLS)
     
+    portfolio.hello() 
     
     #listen for book updates... 
     # if "type" == "book", put this JSON object in a "book" variable (analogous for "trade" type)
