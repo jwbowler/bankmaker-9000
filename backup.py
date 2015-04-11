@@ -133,10 +133,10 @@ class Portfolio(object):
     def handle_fill(message):
         order_id = message['order_id']
 
-        if message['dir'] = 'BUY':
+        if message['dir'] == 'BUY':
             self.balance -= message['price'] * message['size']
             self.positions[message['symbol']] += message['price'] * message['size']
-        if message['dir'] = 'SELL':
+        if message['dir'] == 'SELL':
             self.balance += message['price'] * message['size']
             self.positions[message['symbol']] -= message['price'] * message['size']
 
@@ -227,11 +227,11 @@ class TradeOrder(Order):
     def get_json_request(self):
         request = jsonify({
             "type": "add",
-            "order_id": self.counter,
-            "symbol": symbol,
-            "dir": direction,
-            "price": price,
-            "size": size})
+            "order_id": self.order_id,
+            "symbol": self.symbol,
+            "dir": self.direction,
+            "price": self.price,
+            "size": self.size})
         return request
 
 
@@ -245,10 +245,11 @@ class ConvertOrder(Order):
     def get_json_request(self):
         request = jsonify({
             "type": "convert",
-            "order_id": self.counter,
+            "order_id": self.order_id,
             "symbol": "CORGE",
-            "dir": direction,
-            "size": size})
+            "dir": self.direction,
+            "size": self.size})
+        return request
 
 
 def calc_pnl(portfolio, stocks):
@@ -357,7 +358,8 @@ if __name__ == '__main__':
 
     while True:
         # block until received message, and un-JSONify it
-        message = s.get_next()
+        #message = s.get_next()
+        message = None
         handle(message)
         # strategy.step()
 #	pass
