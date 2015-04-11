@@ -100,20 +100,18 @@ class Market:
 class Portfolio:
 
     def __init__(self):
-	self.received_hello = False
+	    self.received_hello = False
         self.numrequests = 0
         self.pending_orders = {}
 
-    def recv_hello(hello_message):
-        self.balance = 0
-        self.positions = {symbol: 0 for symbol in SYMBOLS}
+    def recv_hello(hello_message)
+        self.balance = hello_message['cash']
+        self.positions = {symbol: hello_message['symbols'][symbol] for symbol in SYMBOLS}
         self.received_hello = True
 
     def handle_ack(ack_message):
         id = ack_message['order_id']
         self.pending_orders[id].handle_ack(ack_message)
-
-
 
     def buy(self, symbol, price, size):
         request = jsonify({\
@@ -126,11 +124,10 @@ class Portfolio:
         self.numrequests += 1
         s.send(request)
         print request
-	res = json.loads(s.recv())
+	    res = json.loads(s.recv())
         print s.buf
-	return res
-            
-        
+	    return res
+
     def sell(self, symbol, price, size):
         request = jsonify({\
             "type": "add", \
@@ -142,7 +139,7 @@ class Portfolio:
         self.numrequests += 1
         s.send(request)
         return json.loads(s.recv())
-    
+
     def convert(self, dir, size):
         request = jsonify({\
             "type": "convert", \
@@ -153,7 +150,7 @@ class Portfolio:
         self.numrequests += 1
         s.send(request)
         return json.loads(s.recv())
-        
+
       # fixed cost of 100 per conversion (regardless of size)
       # one CORGE = 0.3 FOO + 0.8 BAR
       # returns ACK or REJECT
@@ -230,7 +227,7 @@ class mysocket:
           else:
             message, self.buf = self.buf.split('\n', 1)
             return message
-        
+
 
 def jsonify(p):
     return json.dumps(p) + '\n'
@@ -260,7 +257,7 @@ if __name__ == '__main__':
     BUFFER_SIZE = 4096
     s = mysocket()
     s.connect(TCP_IP, TCP_PORT)
-    
+
     # s.close() at some point
 
     SYMBOLS = ['FOO', 'BAR', 'BAZ', 'QUUX', 'CORGE']
