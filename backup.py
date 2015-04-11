@@ -117,20 +117,20 @@ class Portfolio(object):
         self.counter = 0
         self.pending_orders = {}
 
-    def recv_hello(hello_message):
+    def recv_hello(self, hello_message):
         self.balance = hello_message['cash']
         self.positions = {symbol: hello_message['symbols'][symbol] for symbol in SYMBOLS}
         self.received_hello = True
 
-    def handle_ack(message):
+    def handle_ack(self, message):
         order_id = message['order_id']
         self.pending_orders[order_id].handle_ack(message)
 
-    def handle_reject(message):
+    def handle_reject(self, message):
         order_id = message['order_id']
         del self.pending_orders[order_id]
 
-    def handle_fill(message):
+    def handle_fill(self, message):
         order_id = message['order_id']
 
         if message['dir'] == 'BUY':
@@ -142,7 +142,7 @@ class Portfolio(object):
 
         del self.pending_orders[order_id]
 
-    def handle_out(message):
+    def handle_out(self, message):
         order_id = message['order_id']
         del self.pending_orders[order_id]
 
