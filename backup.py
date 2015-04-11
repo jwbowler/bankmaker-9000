@@ -252,8 +252,8 @@ if __name__ == '__main__':
     s = mysocket()
     s.connect(TCP_IP, TCP_PORT)
 
-    t = Thread(target = s.recv)
-    t.start()
+    # t = Thread(target = s.recv)
+    # t.start()
     
     # s.close() at some point
 
@@ -308,5 +308,8 @@ if __name__ == '__main__':
     # if "type" == "book", put this JSON object in a "book" variable (analogous for "trade" type)
     send_hello()
     portfolio.buy("CORGE", 100, 100)
-    portfolio.convert("FOO", "SELL", 10)
+    portfolio.convert("SELL", 10)
+
+    
+    s.recv()
 
