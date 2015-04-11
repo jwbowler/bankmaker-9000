@@ -374,5 +374,6 @@ if __name__ == '__main__':
     portfolio.cancel(0)
 
     t = Thread(target=s.recv)
+    t.daemon = True
     t.start()
 
