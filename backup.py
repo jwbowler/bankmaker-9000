@@ -102,7 +102,7 @@ class Portfolio:
             "size": size})
         self.numrequests += 1
         s.mysend(request)
-        return s.myreceive(json.loads(BUFFER_SIZE))
+        return json.loads(s.myreceive())
             
         
     def sell(self, symbol, price, size):
@@ -115,7 +115,7 @@ class Portfolio:
             "size": size})
         self.numrequests += 1
         s.mysend(request)
-        return s.myreceive(json.loads(BUFFER_SIZE))
+        return json.loads(s.myreceive())
     
     def convert(self, dir, size):
         request = jsonify({\
@@ -126,7 +126,7 @@ class Portfolio:
             "size": size})
         self.numrequests += 1
         s.mysend(request)
-        return s.myreceive(json.loads(BUFFER_SIZE))
+        return json.loads(s.myreceive())
         
       # fixed cost of 100 per conversion (regardless of size)
       # one CORGE = 0.3 FOO + 0.8 BAR
@@ -137,7 +137,7 @@ class Portfolio:
             "type": "cancel", \
             "order_id": order_id})
         s.mysend(request)
-        s.myreceive(json.loads(BUFFER_SIZE))
+        json.loads(s.myreceive())
       # returns OUT even if order_id is invalid
 
         
