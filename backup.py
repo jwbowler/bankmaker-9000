@@ -301,6 +301,12 @@ class Strategy(object):
         foo = self.market.stocks['FOO']
         bar = self.market.stocks['BAR']
 
+        corgeAsk = corge.best_asks
+        corgeBid = corge.best_bids
+        fooAsk = foo.best_asks
+        fooBid = foo.best_bids
+        barAsk = bar.best_asks
+        barBid = bar.best_bids
         if not all([len(x) > 0 for x in [corgeAsk, corgeBid, fooAsk, fooBid, barAsk, barBid]]):
             return
         corgeAsk = corge.best_asks[-1]
