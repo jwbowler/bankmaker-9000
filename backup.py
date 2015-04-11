@@ -222,17 +222,17 @@ class mysocket:
         data = ''
         message = ''
         while True:
-          data += self.sock.recv(BUFFER_SIZE)
-          # if not data:
-          #   break
-          self.buf += data
-          if '\n' not in self.buf:
-            message += self.buf
-            self.buf = ''
-          else:
-            messages = self.buf.split('\n')
-            self.buf = messages.pop(-1)
-            self.log.extend(messages)
+            data += self.sock.recv(BUFFER_SIZE)
+            # if not data:
+            #   break
+            self.buf += data
+            if '\n' not in self.buf:
+                message += self.buf
+                self.buf = ''
+            else:
+                messages = self.buf.split('\n')
+                self.buf = messages.pop(-1)
+                self.log.extend(messages)
             print self.log
 
 def jsonify(p):
