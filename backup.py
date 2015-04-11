@@ -408,7 +408,7 @@ if __name__ == '__main__':
         TCP_IP = '10.0.207.145'
     else:
         TCP_IP = 'real exchange ip'
-    TCP_PORT = 40000 + TEST_INDEX
+    TCP_PORT = 25000 + TEST_INDEX
     BUFFER_SIZE = 4096
     s = mysocket()
     s.connect(TCP_IP, TCP_PORT)
@@ -472,7 +472,7 @@ if __name__ == '__main__':
     #listen for book updates...
     # if "type" == "book", put this JSON object in a "book" variable (analogous for "trade" type)
     send_hello()
-    #portfolio.buy("BAR", 100, 100)
+    portfolio.sell("BAR", 3000, 10)
     #portfolio.cancel(0)
 
     while True:
