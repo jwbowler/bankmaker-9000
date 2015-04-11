@@ -202,7 +202,7 @@ class mysocket:
 
     def mysend(self, msg):
         totalsent = 0
-        while totalsent < MSGLEN:
+        while totalsent < len(msg):
             sent = self.sock.send(msg[totalsent:])
             if sent == 0:
                 raise RuntimeError("socket connection broken")
@@ -211,12 +211,14 @@ class mysocket:
     def myreceive(self):
         chunks = []
         bytes_recd = 0
-        while bytes_recd < MSGLEN:
-            chunk = self.sock.recv(min(MSGLEN - bytes_recd, 2048))
+        while True:
+            chunk = self.sock.recv(min(len(msg) - bytes_recd, 2048))
             if chunk == '':
                 raise RuntimeError("socket connection broken")
             chunks.append(chunk)
             bytes_recd = bytes_recd + len(chunk)
+            if '}' in chunk:
+                break
         return ''.join(chunks)
 
 if __name__ == '__main__':
