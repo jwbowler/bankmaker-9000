@@ -11,6 +11,13 @@ class Book:
         self.sell = book_dict['sell']
         
         
+class Trade:
+    def __init__(self, trade_dict):
+        self.symbol = trade_dict.symbol
+        self.price = trade_dict.price
+        self.size = trade_dict.size
+
+
 class Stock:
 
     ##has: current book, list of transactions, list of historical best bids and best asks
@@ -68,19 +75,45 @@ class Stock:
                     break
         return value
             
+    def getFair(self):
+        # naiveMethod1
+        best_bids = self.best_bids
+        best_asks = self.best_asks
+        fair = 0.5*(best_bids[-1]+best_asks[-1])
+        
+        return fair
+        
+            
 
+class Market:
+
+    def __init__(self, symbols):
+        stocks = {symbol: Stock(symbol) for symbol in SYMBOLS}
+        is_open = False
+        
+    def update(self, book_message):
+        symbol = book_message['symbol']
+        stocks[symbol].update(book_message)
                 
        
             
 class Portfolio:
     
-    def __init__(self, symbols):
+    def __init__(self):
+	self.received_hello = False
+
+    def recv_hello(hello_message)
         self.balance = 0
         self.positions = {symbol: 0 for symbol in SYMBOLS}
         self.numrequests = 0
+        self.pending_orders = {}
+        self.received_hello = True
         
-        
-    def hello(self): #MUST ISSUE FIRST!!
+    def handle_ack(ack_message):
+        id = ack_message['order_id']
+        self.pending_orders[id].handle_ack(ack_message) 
+
+    def send_hello(self): #MUST ISSUE FIRST!!
     
         request = jsonify({\
                 "type": "hello", \
@@ -140,49 +173,37 @@ class Portfolio:
         json.loads(s.recv(BUFFER_SIZE))
       # returns OUT even if order_id is invalid
 
+
+class Strategy:
+    def __init__(self, market, portfolio):
+        self.market = market
+        self.portfolio = portfolio
         
-class Trade:
-    def __init__(self, trade_dict):
-        self.symbol = trade_dict.symbol
-        self.price = trade_dict.price
-        self.size = trade_dict.size
+    def step(self):
+        
+        pass
+        # do stuff
+        
+        
+class Order:
+    def __init__(self, id, symbol, dir, price, size):
+        self.id = id
+        self.symbol = symbol
+        self.dir = dir
+        self.price = price
+        self.size = size
+        
+        # possible states: CREATED, ACKED, CANCELLING
+        self.state = 'CREATED'
+        
+    def handle_ack(self):
+        pass
    
 
 
 def calc_pnl(portfolio, stocks):
     return portfolio.balance + sum([stock.get_liquidated_value() for stock in stocks])
         
-        
-        
-def handle(message):
-    t = message['type']
-    
-    if t == 'hello':
-        pass
-    
-    if t == 'market_open':
-        pass
-    
-    if t == 'error':
-        pass
-    
-    if t == 'book':
-        pass
-    
-    if t == 'trade':
-        pass
-    
-    if t == 'ack':
-        pass
-    
-    if t == 'reject':
-        pass
-    
-    if t == 'fill':
-        pass
-        
-    if t == 'out':
-        pass
         
 
 
@@ -244,10 +265,50 @@ if __name__ == '__main__':
     SYMBOLS = ['FOO', 'BAR', 'BAZ', 'QUUX', 'CORGE']
     TEAM_NAME = 'BANKMAKERS'
     
-    stocks = [Stock(symbol) for symbol in SYMBOLS]
-    portfolio = Portfolio(SYMBOLS)
+    #stocks = [Stock(symbol) for symbol in SYMBOLS]
+    #portfolio = Portfolio(SYMBOLS)
     
-    portfolio.hello()
+    #portfolio.hello() 
+
+    market = Market(SYMBOLS)
+    portfolio = Portfolio()
+    strategy = Strategy(market, portfolio)
+    
+    def handle(message):
+        t = message['type']
+        
+        if t == 'hello':
+            portfolio.recv_hello(message)
+        
+        if t == 'market_open':
+            market.is_open = message['open']
+        
+        if t == 'error':
+            assert False
+        
+        if t == 'book':
+            market.update(message)
+        
+        if t == 'trade':
+            market.update(message)
+        
+        if t == 'ack':
+            portfolio.handle_ack(message)
+        
+        if t == 'reject':
+            portfolio.handle_reject(message)
+        
+        if t == 'fill':
+            portfolio.handle_fill(message)
+            
+        if t == 'out':
+            portfolio.handle_out(message)
+            
+    
+    while True:
+        # block until received message, and un-JSONify it
+        handle(message)
+        strategy.step()
     
     #listen for book updates... 
     # if "type" == "book", put this JSON object in a "book" variable (analogous for "trade" type)
