@@ -87,7 +87,7 @@ class Portfolio:
                 "team": TEAM_NAME })
         s.mysend(request)
         print "Sent request"
-        res = s.myreceive(BUFFER_SIZE)
+        res = json.loads(s.myreceive())
         print "Response:", res
         return res
     
