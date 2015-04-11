@@ -223,8 +223,8 @@ class mysocket:
         message = ''
         while True:
           data += self.sock.recv(BUFFER_SIZE)
-          if not data:
-            break
+          # if not data:
+          #   break
           self.buf += data
           if '\n' not in self.buf:
             message += self.buf
