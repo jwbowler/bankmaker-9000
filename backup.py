@@ -80,7 +80,7 @@ class Portfolio:
         self.numrequests = 0
         
         
-    def hello(): #MUST ISSUE FIRST!!
+    def hello(self): #MUST ISSUE FIRST!!
     
         request = jsonify({\
                 "type": "hello", \
@@ -92,7 +92,7 @@ class Portfolio:
         return res
     
     
-    def buy(symbol, price, size): 
+    def buy(self, symbol, price, size): 
         request = json.dumps({\
             "type": "add", \
             "order_id": self.numrequests, \
@@ -105,7 +105,7 @@ class Portfolio:
         return json.loads(s.recv(BUFFER_SIZE))
             
         
-    def sell(symbol, price, size):
+    def sell(self, symbol, price, size):
         request = json.dumps({\
             "type": "add", \
             "order_id": self.numrequests, \
@@ -117,7 +117,7 @@ class Portfolio:
         s.send(request)
         return json.loads(s.recv(BUFFER_SIZE))
     
-    def convert(dir, size):
+    def convert(self, dir, size):
         request = json.dumps({\
             "type": "convert", \
             "order_id": self.numrequests, \
@@ -132,7 +132,7 @@ class Portfolio:
       # one CORGE = 0.3 FOO + 0.8 BAR
       # returns ACK or REJECT
     
-    def cancel(order_id):
+    def cancel(self, order_id):
         request = json.dumps({\
             "type": "cancel", \
             "order_id": order_id})
@@ -185,8 +185,6 @@ def handle(message):
         pass
         
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 
 # class mysocket:
 #     '''demonstration class only
@@ -223,10 +221,9 @@ def handle(message):
 #             if '}' in chunk:
 #                 break
 #         return ''.join(chunks)
-=======
->>>>>>> parent of d8d8eb7... working hello! needs to read more from buffer
-=======
->>>>>>> parent of d8d8eb7... working hello! needs to read more from buffer
+
+def jsonify(p):
+    return json.dumps(p) + '\n'
 
 if __name__ == '__main__':
     
@@ -250,6 +247,7 @@ if __name__ == '__main__':
     stocks = [Stock(symbol) for symbol in SYMBOLS]
     portfolio = Portfolio(SYMBOLS)
     
+    portfolio.hello()
     
     #listen for book updates... 
     # if "type" == "book", put this JSON object in a "book" variable (analogous for "trade" type)
