@@ -230,7 +230,7 @@ if __name__ == '__main__':
     TCP_PORT = 25000 + TEST_INDEX
     BUFFER_SIZE = 1024
     
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s = mysocket()
     s.connect((TCP_IP, TCP_PORT))
     
     # s.close() at some point
