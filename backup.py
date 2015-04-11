@@ -4,21 +4,21 @@ import socket
 
 
 
-class Book:
+class Book(object):
     def update(book_dict):
         self.symbol = book_dict['symbol']
         self.buy = book_dict['buy']
         self.sell = book_dict['sell']
 
 
-class Trade:
+class Trade(object):
     def __init__(self, trade_dict):
         self.symbol = trade_dict.symbol
         self.price = trade_dict.price
         self.size = trade_dict.size
 
 
-class Stock:
+class Stock(object):
 
     ##has: current book, list of transactions, list of historical best bids and best asks
     def __init__(self, symbol):
@@ -85,7 +85,7 @@ class Stock:
 
 
 
-class Market:
+class Market(object):
 
     def __init__(self, symbols):
         stocks = {symbol: Stock(symbol) for symbol in SYMBOLS}
@@ -97,11 +97,11 @@ class Market:
 
 
 
-class Portfolio:
+class Portfolio(object):
 
     def __init__(self):
 	    self.received_hello = False
-        self.numrequests = 0
+        self.counter = 0
         self.pending_orders = {}
 
     def recv_hello(hello_message)
@@ -109,86 +109,134 @@ class Portfolio:
         self.positions = {symbol: hello_message['symbols'][symbol] for symbol in SYMBOLS}
         self.received_hello = True
 
-    def handle_ack(ack_message):
-        id = ack_message['order_id']
-        self.pending_orders[id].handle_ack(ack_message)
+    def handle_ack(message):
+        order_id = message['order_id']
+        self.pending_orders[order_id].handle_ack(message)
 
-    def buy(self, symbol, price, size):
-        request = jsonify({\
-            "type": "add", \
-            "order_id": self.numrequests, \
-            "symbol": symbol, \
-            "dir": "BUY", \
-            "price": price, \
-            "size": size})
-        self.numrequests += 1
+    def handle_reject(message):
+        order_id = message['order_id']
+        del self.pending_orders[order_id]
+
+    def handle_fill(message):
+        order_id = message['order_id']
+
+        if message['dir'] = 'BUY':
+            self.balance -= message['price'] * message['size']
+            self.positions[message['symbol']] += message['price'] * message['size']
+        if message['dir'] = 'SELL':
+            self.balance += message['price'] * message['size']
+            self.positions[message['symbol']] -= message['price'] * message['size']
+
+        del self.pending_orders[order_id]
+
+    def handle_out(message):
+        order_id = message['order_id']
+        del self.pending_orders[order_id]
+
+    def trade(self, symbol, price, size, direction):
+        order_id = self.counter
+        order = TradeOrder(order_id, symbol, direction, price, size)
+        self.pending_orders[order_id] = order
+
+        request = order.get_json_request()
+        self.counter += 1
         s.send(request)
         print request
-	    res = json.loads(s.recv())
-        print s.buf
-	    return res
+	    #res = json.loads(s.recv())
+        #print s.buf
+	    #return res
+        return order_id
+
+    def buy(self, symbol, price, size):
+        self.trade(symbol, price, size, 'BUY')
 
     def sell(self, symbol, price, size):
-        request = jsonify({\
-            "type": "add", \
-            "order_id": self.numrequests, \
-            "symbol": symbol, \
-            "dir": "SELL", \
-            "price": price, \
-            "size": size})
-        self.numrequests += 1
-        s.send(request)
-        return json.loads(s.recv())
+        self.trade(symbol, price, size, 'SELL')
 
-    def convert(self, dir, size):
-        request = jsonify({\
-            "type": "convert", \
-            "order_id": self.numrequests, \
-            "symbol": "CORGE", \
-            "dir": dir, \
-            "size": size})
-        self.numrequests += 1
+        #return json.loads(s.recv())
+
+    def convert(self, direction, size):
+        order_id = self.counter
+        order = ConvertOrder(order_id, direction, size)
+        self.pending_orders[order_id] = order
+
+        request = order.get_json_request()
+        self.counter += 1
         s.send(request)
-        return json.loads(s.recv())
+        #return json.loads(s.recv())
+        return order_id
 
       # fixed cost of 100 per conversion (regardless of size)
       # one CORGE = 0.3 FOO + 0.8 BAR
       # returns ACK or REJECT
 
     def cancel(self, order_id):
-        request = jsonify({\
-            "type": "cancel", \
+        self.pending_orders[order_id].cancel()
+        request = jsonify({
+            "type": "cancel",
             "order_id": order_id})
         s.send(request)
-        json.loads(s.recv())
+        #json.loads(s.recv())
       # returns OUT even if order_id is invalid
 
 
-class Strategy:
+class Strategy(object):
     def __init__(self, market, portfolio):
         self.market = market
         self.portfolio = portfolio
 
     def step(self):
-
         pass
         # do stuff
 
 
-class Order:
-    def __init__(self, id, symbol, dir, price, size):
-        self.id = id
-        self.symbol = symbol
-        self.dir = dir
-        self.price = price
-        self.size = size
+class Order(object):
+    def __init__(self, order_id):
+        self.order_id = order_id
 
         # possible states: CREATED, ACKED, CANCELLING
         self.state = 'CREATED'
 
     def handle_ack(self):
-        pass
+        self.state = 'ACKED'
 
+    def cancel(self):
+        self.state = 'CANCELLED'
+
+
+class TradeOrder(Order):
+    def __init__(self, order_id, symbol, direction, price, size):
+        super(TradeOrder, self).__init__(order_id)
+        self.symbol = symbol
+        self.direction = direction
+        self.price = price
+        self.size = size
+
+    def get_json_request(self):
+        request = jsonify({
+            "type": "add",
+            "order_id": self.counter,
+            "symbol": symbol,
+            "dir": direction,
+            "price": price,
+            "size": size})
+        return request
+
+
+class ConvertOrder(Order):
+    def __init__(self, order_id, direction, size):
+        super(ConvertOrder, self).__init__(order_id)
+        self.symbol = 'CORGE'
+        self.direction = direction
+        self.size = size
+
+    def get_json_request(self):
+        request = jsonify({
+            "type": "convert",
+            "order_id": self.counter,
+            "symbol": "CORGE",
+            "dir": direction,
+            "size": size})
 
 
 def calc_pnl(portfolio, stocks):
@@ -197,7 +245,7 @@ def calc_pnl(portfolio, stocks):
 
 
 
-class mysocket:
+class mysocket(object):
 
     def __init__(self, sock=None):
         if sock is None:
@@ -273,6 +321,9 @@ if __name__ == '__main__':
     def handle(message):
         t = message['type']
 
+        print 'Handling:'
+        print message
+
         if t == 'hello':
             portfolio.recv_hello(message)
 
@@ -301,13 +352,15 @@ if __name__ == '__main__':
             portfolio.handle_out(message)
 
 
-#    while True:
+    send_hello()
+    portfolio.buy("FOO", 100, 1)
+
+    while True:
         # block until received message, and un-JSONify it
-        # handle(message)
+        message = s.get_next()
+        handle(message)
         # strategy.step()
 #	pass
 
     #listen for book updates...
     # if "type" == "book", put this JSON object in a "book" variable (analogous for "trade" type)
-    send_hello()
-    portfolio.buy("FOO", 100, 1)
