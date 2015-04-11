@@ -1,3 +1,7 @@
+import errno
+import sys
+import os
+import fcntl
 import time
 import json
 import socket
@@ -5,7 +9,7 @@ from threading import Thread
 
 
 class Book(object):
-    def update(book_dict):
+    def update(self, book_dict):
         self.symbol = book_dict['symbol']
         self.buy = book_dict['buy']
         self.sell = book_dict['sell']
@@ -13,9 +17,9 @@ class Book(object):
 
 class Trade(object):
     def __init__(self, trade_dict):
-        self.symbol = trade_dict.symbol
-        self.price = trade_dict.price
-        self.size = trade_dict.size
+        self.symbol = trade_dict['symbol']
+        self.price = trade_dict['price']
+        self.size = trade_dict['size']
 
 
 class Stock(object):
@@ -82,8 +86,10 @@ class Stock(object):
         
     def getMarketValue(self):
         # naive
+	if len(self.best_bids) == 0 or len(self.best_asks) == 0:
+		return None
         best_bids = self.best_bids[-1][0]
-        best_asks = self.best_asks[-1][0]
+	best_asks = self.best_asks[-1][0]
         marketValue = 0.5*(best_bids+best_asks)
         
         return marketValue
@@ -91,6 +97,8 @@ class Stock(object):
     def updateMarketValue(self):
         numPrev = min(len(self.market_val), 99)
         current = self.getMarketValue()
+	if len(self.market_avg1) == 0:
+		return None
         average = 1.0*(numPrev*self.market_avg1[-1] + current)/(numPrev+1)
         
         self.market_val.append(current)
@@ -106,7 +114,7 @@ class Market(object):
 
     def update(self, book_message):
         symbol = book_message['symbol']
-        stocks[symbol].update(book_message)
+        self.stocks[symbol].update(book_message)
 
 
 
@@ -117,20 +125,21 @@ class Portfolio(object):
         self.counter = 0
         self.pending_orders = {}
 
-    def recv_hello(hello_message):
+    def recv_hello(self, hello_message):
         self.balance = hello_message['cash']
-        self.positions = {symbol: hello_message['symbols'][symbol] for symbol in SYMBOLS}
+        syms = hello_message['symbols']
+        self.positions = {sym['symbol']: sym['position'] for sym in syms}
         self.received_hello = True
 
-    def handle_ack(message):
+    def handle_ack(self, message):
         order_id = message['order_id']
-        self.pending_orders[order_id].handle_ack(message)
+        self.pending_orders[order_id].handle_ack()
 
-    def handle_reject(message):
+    def handle_reject(self, message):
         order_id = message['order_id']
         del self.pending_orders[order_id]
 
-    def handle_fill(message):
+    def handle_fill(self, message):
         order_id = message['order_id']
 
         if message['dir'] == 'BUY':
@@ -142,7 +151,7 @@ class Portfolio(object):
 
         del self.pending_orders[order_id]
 
-    def handle_out(message):
+    def handle_out(self, message):
         order_id = message['order_id']
         del self.pending_orders[order_id]
 
@@ -154,7 +163,6 @@ class Portfolio(object):
         request = order.get_json_request()
         self.counter += 1
         s.send(request)
-        print request
         #res = json.loads(s.recv())
         #print s.buf
         #return res
@@ -295,22 +303,27 @@ class mysocket(object):
 
     def connect(self, host, port):
         self.sock.connect((host, port))
+        fcntl.fcntl(self.sock, fcntl.F_SETFL, os.O_NONBLOCK)
 
     def send(self, msg):
         print "Sending: ", msg
         self.sock.send(msg)
 
-    def recv(self):
-        data = ''
-        while True:
-            data += self.sock.recv(BUFFER_SIZE)
-            # if not data:
-            #   break
-            self.log.extend(data.split('\n'))
-            print self.log
-
     def get_next(self):
-        return self.log.pop(0)
+        try:
+            data = self.sock.recv(BUFFER_SIZE)
+            if not data:
+                return
+        except socket.error, e:
+            err = e.args[0]
+            if not (err == errno.EAGAIN or err == errno.EWOULDBLOCK):
+                # a "real" error occurred
+                print e
+                sys.exit(1)
+        else:
+            self.log.extend(data.strip().split('\n'))
+            #print self.log
+            return json.loads(self.log.pop(0))
 
 def jsonify(p):
     return json.dumps(p) + '\n'
@@ -353,13 +366,15 @@ if __name__ == '__main__':
     strategy = Strategy(market, portfolio)
 
     def handle(message):
-        t = message['type']
 
-        print 'Handling:'
-        print message
-
+	if not message:
+	    time.sleep(.001)
+	    return
+        
+	t = message['type']
         if t == 'hello':
-            portfolio.recv_hello(message)
+            print message
+	    portfolio.recv_hello(message)
 
         if t == 'market_open':
             market.is_open = message['open']
@@ -374,23 +389,23 @@ if __name__ == '__main__':
             market.update(message)
 
         if t == 'ack':
+	    print "ACK:", message
             portfolio.handle_ack(message)
 
         if t == 'reject':
+	    print "REJECT:", message
             portfolio.handle_reject(message)
 
         if t == 'fill':
+            print "FILL:", message
             portfolio.handle_fill(message)
 
         if t == 'out':
-            portfolio.handle_out(message)
+            print "OUT:", message
+	    portfolio.handle_out(message)
 
 
-#     while True:
-#         # block until received message, and un-JSONify it
-#         #message = s.get_next()
-#         message = None
-#         handle(message)
+
 #         # strategy.step()
 # #	pass
 
@@ -400,7 +415,7 @@ if __name__ == '__main__':
     portfolio.buy("BAR", 100, 100)
     portfolio.cancel(0)
 
-    t = Thread(target=s.recv)
-    t.daemon = True
-    t.start()
-
+    while True:
+        # block until received message, and un-JSONify it
+        message = s.get_next()
+        handle(message)
