@@ -113,16 +113,6 @@ class Portfolio:
         id = ack_message['order_id']
         self.pending_orders[id].handle_ack(ack_message)
 
-    def send_hello(self): #MUST ISSUE FIRST!!
-
-        request = jsonify({\
-                "type": "hello", \
-                "team": TEAM_NAME })
-        s.send(request)
-        print "Sent request"
-        res = json.loads(s.recv(BUFFER_SIZE))
-        print "Response:", res
-        return res
 
 
     def buy(self, symbol, price, size):
@@ -245,6 +235,19 @@ def calc_pnl(portfolio, stocks):
 
 def jsonify(p):
     return json.dumps(p) + '\n'
+
+
+def send_hello(self): #MUST ISSUE FIRST!!
+
+    request = jsonify({\
+                       "type": "hello", \
+                       "team": TEAM_NAME })
+    s.send(request)
+    print "Sent request"
+    res = json.loads(s.recv(BUFFER_SIZE))
+    print "Response:", res
+    return res
+
 
 if __name__ == '__main__':
 
