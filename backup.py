@@ -284,6 +284,11 @@ class mysocket(object):
             print self.log
 
     def get_next(self):
+
+        data += self.sock.recv(BUFFER_SIZE)
+        # if not data:
+        #   break
+        self.log.extend(data.split('\n'))
         return self.log.pop(0)
 
 def jsonify(p):
@@ -359,11 +364,7 @@ if __name__ == '__main__':
             portfolio.handle_out(message)
 
 
-#     while True:
-#         # block until received message, and un-JSONify it
-#         #message = s.get_next()
-#         message = None
-#         handle(message)
+
 #         # strategy.step()
 # #	pass
 
@@ -373,7 +374,8 @@ if __name__ == '__main__':
     portfolio.buy("BAR", 100, 100)
     portfolio.cancel(0)
 
-    t = Thread(target=s.recv)
-    t.daemon = True
-    t.start()
+    while True:
+        # block until received message, and un-JSONify it
+        message = s.get_next()
+        handle(message)
 
