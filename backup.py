@@ -125,8 +125,6 @@ class Portfolio:
         s.send(request)
         return s.recv(json.loads(BUFFER_SIZE))
         
-      # dir = “BUY” or “SELL”, buy = convert to CORGE, sell = convert from CORGE
-      # size must be a multiple of 10!!!
       # fixed cost of 100 per conversion (regardless of size)
       # one CORGE = 0.3 FOO + 0.8 BAR
       # returns ACK or REJECT
@@ -192,7 +190,7 @@ if __name__ == '__main__':
     if TEST:
         TCP_IP = '10.0.207.145'
     else:
-        # TCP_IP = 'real exchange ip'
+        TCP_IP = 'real exchange ip'
     TCP_PORT = 25000 + TEST_INDEX
     BUFFER_SIZE = 1024
     
@@ -205,7 +203,7 @@ if __name__ == '__main__':
     TEAM_NAME = 'BANKMAKERS'
     
     stocks = [Stock(symbol) for symbol in SYMBOLS]
-    portfolio = Portfolio()
+    portfolio = Portfolio(SYMBOLS)
     
     
     #listen for book updates... 
