@@ -85,9 +85,9 @@ class Portfolio:
         request = jsonify({\
                 "type": "hello", \
                 "team": TEAM_NAME })
-        s.mysend(request)
+        s.send(request)
         print "Sent request"
-        res = json.loads(s.myreceive())
+        res = json.loads(s.recv(BUFFER_SIZE))
         print "Response:", res
         return res
     
@@ -101,8 +101,8 @@ class Portfolio:
             "price": price, \
             "size": size})
         self.numrequests += 1
-        s.mysend(request)
-        return json.loads(s.myreceive())
+        s.send(request)
+        return json.loads(s.recv(BUFFER_SIZE))
             
         
     def sell(self, symbol, price, size):
@@ -114,8 +114,8 @@ class Portfolio:
             "price": price, \
             "size": size})
         self.numrequests += 1
-        s.mysend(request)
-        return json.loads(s.myreceive())
+        s.send(request)
+        return json.loads(s.recv(BUFFER_SIZE))
     
     def convert(self, dir, size):
         request = jsonify({\
@@ -125,8 +125,8 @@ class Portfolio:
             "dir": dir, \
             "size": size})
         self.numrequests += 1
-        s.mysend(request)
-        return json.loads(s.myreceive())
+        s.send(request)
+        return json.loads(s.recv(BUFFER_SIZE))
         
       # fixed cost of 100 per conversion (regardless of size)
       # one CORGE = 0.3 FOO + 0.8 BAR
@@ -136,8 +136,8 @@ class Portfolio:
         request = jsonify({\
             "type": "cancel", \
             "order_id": order_id})
-        s.mysend(request)
-        json.loads(s.myreceive())
+        s.send(request)
+        json.loads(s.recv(BUFFER_SIZE))
       # returns OUT even if order_id is invalid
 
         
@@ -185,41 +185,41 @@ def handle(message):
 def jsonify(p):
     return json.dumps(p) + '\n'
 
-class mysocket:
-    '''demonstration class only
-      - coded for clarity, not efficiency
-    '''
+# class mysocket:
+#     '''demonstration class only
+#       - coded for clarity, not efficiency
+#     '''
 
-    def __init__(self, sock=None):
-        if sock is None:
-            self.sock = socket.socket(
-                socket.AF_INET, socket.SOCK_STREAM)
-        else:
-            self.sock = sock
+#     def __init__(self, sock=None):
+#         if sock is None:
+#             self.sock = socket.socket(
+#                 socket.AF_INET, socket.SOCK_STREAM)
+#         else:
+#             self.sock = sock
 
-    def connect(self, host, port):
-        self.sock.connect((host, port))
+#     def connect(self, host, port):
+#         self.sock.connect((host, port))
 
-    def mysend(self, msg):
-        totalsent = 0
-        while totalsent < len(msg):
-            sent = self.sock.send(msg[totalsent:])
-            if sent == 0:
-                raise RuntimeError("socket connection broken")
-            totalsent = totalsent + sent
+#     def mysend(self, msg):
+#         totalsent = 0
+#         while totalsent < len(msg):
+#             sent = self.sock.send(msg[totalsent:])
+#             if sent == 0:
+#                 raise RuntimeError("socket connection broken")
+#             totalsent = totalsent + sent
 
-    def myreceive(self):
-        chunks = []
-        bytes_recd = 0
-        while True:
-            chunk = self.sock.recv(min(len(msg) - bytes_recd, 2048))
-            if chunk == '':
-                raise RuntimeError("socket connection broken")
-            chunks.append(chunk)
-            bytes_recd = bytes_recd + len(chunk)
-            if '}' in chunk:
-                break
-        return ''.join(chunks)
+#     def myreceive(self):
+#         chunks = []
+#         bytes_recd = 0
+#         while True:
+#             chunk = self.sock.recv(min(len(msg) - bytes_recd, 2048))
+#             if chunk == '':
+#                 raise RuntimeError("socket connection broken")
+#             chunks.append(chunk)
+#             bytes_recd = bytes_recd + len(chunk)
+#             if '}' in chunk:
+#                 break
+#         return ''.join(chunks)
 
 if __name__ == '__main__':
     
@@ -230,10 +230,10 @@ if __name__ == '__main__':
     else:
         TCP_IP = 'real exchange ip'
     TCP_PORT = 25000 + TEST_INDEX
-    BUFFER_SIZE = 1024
+    BUFFER_SIZE = 4096
     
-    s = mysocket()
-    s.connect(TCP_IP, TCP_PORT)
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect((TCP_IP, TCP_PORT))
     
     # s.close() at some point
     
