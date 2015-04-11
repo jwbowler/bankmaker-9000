@@ -258,8 +258,6 @@ class Strategy(object):
             self.portfolio.convert('BUY', num)
             self.portfolio.buy('FOO', fooBid[0], num*0.3)
             self.portfolio.buy('BAR', barBid[0], num*0.8)
-        
-
 
 class Order(object):
     def __init__(self, order_id):
@@ -293,6 +291,39 @@ class TradeOrder(Order):
             "size": self.size})
         return request
 
+class Strategy(object):
+    def __init__(self, market, portfolio):
+        self.market = market
+        self.portfolio = portfolio
+
+    def step(self):
+        # Works with CORGE only for now
+        cost = 100
+        corge = self.market.stocks['CORGE']
+        foo = self.market.stocks['FOO']
+        bar = self.market.stocks['BAR']
+
+        corgeAsk = corge.best_asks[-1]
+        corgeBid = corge.best_bids[-1]
+        fooAsk = foo.best_asks[-1]
+        fooBid = foo.best_bids[-1]
+        barAsk = bar.best_asks[-1]
+        barBid = bar.best_bids[-1]
+        
+        print 
+        print 
+        if corgeBid[0]-(0.3*fooAsk[0]+0.8*barAsk[0])>cost:
+            num = min(fooAsk[1]/0.3, barAsk[1]/0.8, corgeBid[1])
+            self.portfolio.buy('CORGE', corgeBid[0], num)
+            self.portfolio.convert('SELL', num)
+            self.portfolio.sell('FOO', fooAsk[0], num*0.3)
+            self.portfolio.sell('BAR', barAsk[0], num*0.8)
+        elif corgeAsk[0]-(0.3*fooBid[0]+0.8*barBid[0])>cost:
+            num = min(fooBid[1]/0.3, barBid[1]/0.8, corgeAsk[1])
+            self.portfolio.sell('CORGE', corgeAsk[0], num)
+            self.portfolio.convert('BUY', num)
+            self.portfolio.buy('FOO', fooBid[0], num*0.3)
+            self.portfolio.buy('BAR', barBid[0], num*0.8)
 
 class ConvertOrder(Order):
     def __init__(self, order_id, direction, size):
