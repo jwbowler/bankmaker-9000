@@ -289,7 +289,7 @@ class mysocket(object):
         # if not data:
         #   break
         self.log.extend(data.split('\n'))
-        return self.log.pop(0)
+        return json.loads(self.log.pop(0))
 
 def jsonify(p):
     return json.dumps(p) + '\n'
