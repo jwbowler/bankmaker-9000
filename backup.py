@@ -285,7 +285,7 @@ class mysocket(object):
 
     def get_next(self):
 
-        data += self.sock.recv(BUFFER_SIZE)
+        data = self.sock.recv(BUFFER_SIZE)
         # if not data:
         #   break
         self.log.extend(data.split('\n'))
