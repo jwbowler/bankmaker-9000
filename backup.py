@@ -270,6 +270,7 @@ class mysocket(object):
 
     def connect(self, host, port):
         self.sock.connect((host, port))
+        fcntl.fcntl(self.sock, fcntl.F_SETFL, os.O_NONBLOCK)
 
     def send(self, msg):
         print "Sending: ", msg
@@ -278,11 +279,23 @@ class mysocket(object):
     def recv(self):
         data = ''
         while True:
-            data += self.sock.recv(BUFFER_SIZE)
-            # if not data:
-            #   break
-            self.log.extend(data.split('\n'))
-            print self.log
+            try:
+                data += self.sock.recv(BUFFER_SIZE)
+                # if not data:
+                #   break
+            except socket.error, e:
+                err = e.args[0]
+                if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
+                    sleep(1)
+                    print 'No data available'
+                    continue
+                else:
+                    # a "real" error occurred
+                    print e
+                    sys.exit(1)
+            else:
+                self.log.extend(data.split('\n'))
+                print self.log
 
     def get_next(self):
 
