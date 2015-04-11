@@ -376,6 +376,7 @@ if __name__ == '__main__':
     portfolio.cancel(0)
 
     while True:
+        print '.'
         # block until received message, and un-JSONify it
         message = s.get_next()
         handle(message)
