@@ -80,7 +80,7 @@ class Portfolio:
         self.numrequests = 0
         
         
-    def hello(self): #MUST ISSUE FIRST!!
+    def hello(): #MUST ISSUE FIRST!!
     
         request = jsonify({\
                 "type": "hello", \
@@ -92,8 +92,8 @@ class Portfolio:
         return res
     
     
-    def buy(self, symbol, price, size): 
-        request = jsonify({\
+    def buy(symbol, price, size): 
+        request = json.dumps({\
             "type": "add", \
             "order_id": self.numrequests, \
             "symbol": symbol, \
@@ -105,8 +105,8 @@ class Portfolio:
         return json.loads(s.recv(BUFFER_SIZE))
             
         
-    def sell(self, symbol, price, size):
-        request = jsonify({\
+    def sell(symbol, price, size):
+        request = json.dumps({\
             "type": "add", \
             "order_id": self.numrequests, \
             "symbol": symbol, \
@@ -117,8 +117,8 @@ class Portfolio:
         s.send(request)
         return json.loads(s.recv(BUFFER_SIZE))
     
-    def convert(self, dir, size):
-        request = jsonify({\
+    def convert(dir, size):
+        request = json.dumps({\
             "type": "convert", \
             "order_id": self.numrequests, \
             "symbol": "CORGE", \
@@ -132,8 +132,8 @@ class Portfolio:
       # one CORGE = 0.3 FOO + 0.8 BAR
       # returns ACK or REJECT
     
-    def cancel(self, order_id):
-        request = jsonify({\
+    def cancel(order_id):
+        request = json.dumps({\
             "type": "cancel", \
             "order_id": order_id})
         s.send(request)
@@ -151,6 +151,8 @@ class Trade:
 
 def calc_pnl(portfolio, stocks):
     return portfolio.balance + sum([stock.get_liquidated_value() for stock in stocks])
+        
+        
         
 def handle(message):
     t = message['type']
@@ -182,8 +184,7 @@ def handle(message):
     if t == 'out':
         pass
         
-def jsonify(p):
-    return json.dumps(p) + '\n'
+
 
 # class mysocket:
 #     '''demonstration class only
@@ -243,7 +244,6 @@ if __name__ == '__main__':
     stocks = [Stock(symbol) for symbol in SYMBOLS]
     portfolio = Portfolio(SYMBOLS)
     
-    portfolio.hello() 
     
     #listen for book updates... 
     # if "type" == "book", put this JSON object in a "book" variable (analogous for "trade" type)
