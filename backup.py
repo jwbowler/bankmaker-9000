@@ -25,36 +25,41 @@ class Stock:
         self.symbol = symbol
         self.book = Book() # current book
         self.trades = []
-
+        
         # lists of (price, size) tuples
         self.best_bids = []
         self.best_asks = []
-
+        
+        self.market_val = []    # current_val
+        self.market_avg1 = []   # average_val
+        
     # type = book, trade, fill
     def update(self, update_dict):
         if update_dict['type'] == 'book':
             self.book.update(update_dict)
-
+            
             if len(update_dict['buy']) > 0:
                 assert len(update_dict['buy'][0]) == 2
                 new_best_bid = (time.time(), update_dict['buy'][0])
-                self.best_bids.append[update_dict['buy'][0]]
-
+                self.best_bids.append(update_dict['buy'][0])
+                self.updateMarketValue()
+            
             if len(update_dict['sell']) > 0:
                 assert len(update_dict['sell'][0]) == 2
                 new_best_ask = (time.time(), update_dict['sell'][0])
-                self.best_asks.append[update_dict['sell'][0]]
-
+                self.best_asks.append(update_dict['sell'][0])
+                self.updateMarketValue()
+            
         elif update_dict['type'] == 'trade':
             self.trades.append(Trade(update_dict))
-
+         
         elif update_dict['type'] == 'fill':
             pass
-
+            
         else:
             assert False
-
-
+            
+            
     def calc_liquidated_value(self, shares):
         value = 0
         if shares > 0:
@@ -74,14 +79,22 @@ class Stock:
                     value -= price * shares
                     break
         return value
-
-    def getFair(self):
-        # naiveMethod1
-        best_bids = self.best_bids
-        best_asks = self.best_asks
-        fair = 0.5*(best_bids[-1]+best_asks[-1])
-
-        return fair
+        
+    def getMarketValue(self):
+        # naive
+        best_bids = self.best_bids[-1][0]
+        best_asks = self.best_asks[-1][0]
+        marketValue = 0.5*(best_bids+best_asks)
+        
+        return marketValue
+        
+    def updateMarketValue(self):
+        numPrev = min(len(self.market_val), 99)
+        current = self.getMarketValue()
+        average = 1.0*(numPrev*self.market_avg1[-1] + current)/(numPrev+1)
+        
+        self.market_val.append(current)
+        self.market_avg1.append(average)
 
 
 
