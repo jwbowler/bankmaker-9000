@@ -301,6 +301,7 @@ class Strategy(object):
         num_pending = self.portfolio.pending_orders
         assert len(num_pending) <= 3
 
+        print num_pending
         if num_pending > 0:
             return
 
@@ -459,7 +460,7 @@ if __name__ == '__main__':
 
 
 
-        print market
+    # print market
 
 
 #         # strategy.step()
