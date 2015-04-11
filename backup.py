@@ -355,9 +355,6 @@ if __name__ == '__main__':
             portfolio.handle_out(message)
 
 
-    send_hello()
-    portfolio.buy("FOO", 100, 1)
-
     while True:
         # block until received message, and un-JSONify it
         message = s.get_next()
