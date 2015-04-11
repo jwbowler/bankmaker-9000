@@ -113,7 +113,7 @@ class Market(object):
 class Portfolio(object):
 
     def __init__(self):
-	    self.received_hello = False
+        self.received_hello = False
         self.counter = 0
         self.pending_orders = {}
 
@@ -155,9 +155,9 @@ class Portfolio(object):
         self.counter += 1
         s.send(request)
         print request
-	    #res = json.loads(s.recv())
+        #res = json.loads(s.recv())
         #print s.buf
-	    #return res
+        #return res
         return order_id
 
     def buy(self, symbol, price, size):
