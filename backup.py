@@ -114,12 +114,12 @@ class Portfolio:
 
     def __init__(self):
 	self.received_hello = False
+        self.numrequests = 0
+        self.pending_orders = {}
 
     def recv_hello(hello_message):
         self.balance = 0
         self.positions = {symbol: 0 for symbol in SYMBOLS}
-        self.numrequests = 0
-        self.pending_orders = {}
         self.received_hello = True
 
     def handle_ack(ack_message):
@@ -129,7 +129,7 @@ class Portfolio:
 
 
     def buy(self, symbol, price, size):
-        request = json.dumps({\
+        request = jsonify({\
             "type": "add", \
             "order_id": self.numrequests, \
             "symbol": symbol, \
@@ -138,11 +138,14 @@ class Portfolio:
             "size": size})
         self.numrequests += 1
         s.send(request)
-        return json.loads(s.recv())
+        print request
+	res = json.loads(s.recv())
+        print s.buf
+	return res
             
         
     def sell(self, symbol, price, size):
-        request = json.dumps({\
+        request = jsonify({\
             "type": "add", \
             "order_id": self.numrequests, \
             "symbol": symbol, \
@@ -154,7 +157,7 @@ class Portfolio:
         return json.loads(s.recv())
     
     def convert(self, dir, size):
-        request = json.dumps({\
+        request = jsonify({\
             "type": "convert", \
             "order_id": self.numrequests, \
             "symbol": "CORGE", \
@@ -169,7 +172,7 @@ class Portfolio:
       # returns ACK or REJECT
 
     def cancel(self, order_id):
-        request = json.dumps({\
+        request = jsonify({\
             "type": "cancel", \
             "order_id": order_id})
         s.send(request)
@@ -246,14 +249,14 @@ def jsonify(p):
     return json.dumps(p) + '\n'
 
 
-def send_hello(self): #MUST ISSUE FIRST!!
+def send_hello(): #MUST ISSUE FIRST!!
 
     request = jsonify({\
                        "type": "hello", \
                        "team": TEAM_NAME })
     s.send(request)
     print "Sent request"
-    res = json.loads(s.recv(BUFFER_SIZE))
+    res = json.loads(s.recv())
     print "Response:", res
     return res
 
@@ -261,7 +264,7 @@ def send_hello(self): #MUST ISSUE FIRST!!
 if __name__ == '__main__':
 
     TEST = True
-    TEST_INDEX = 0 # 0 = slow, 1 = normal, 2 = empty market
+    TEST_INDEX = 2 # 0 = slow, 1 = normal, 2 = empty market
     if TEST:
         TCP_IP = '10.0.207.145'
     else:
@@ -276,10 +279,8 @@ if __name__ == '__main__':
     SYMBOLS = ['FOO', 'BAR', 'BAZ', 'QUUX', 'CORGE']
     TEAM_NAME = 'BANKMAKERS'
 
-    #stocks = [Stock(symbol) for symbol in SYMBOLS]
-    #portfolio = Portfolio(SYMBOLS)
-
-    #portfolio.hello()
+    stocks = [Stock(symbol) for symbol in SYMBOLS]
+    portfolio = Portfolio()
 
     market = Market(SYMBOLS)
     portfolio = Portfolio()
@@ -316,12 +317,13 @@ if __name__ == '__main__':
             portfolio.handle_out(message)
 
 
-    while True:
+#    while True:
         # block until received message, and un-JSONify it
-        handle(message)
-        strategy.step()
+        # handle(message)
+        # strategy.step()
+#	pass
 
     #listen for book updates...
     # if "type" == "book", put this JSON object in a "book" variable (analogous for "trade" type)
-
-
+    send_hello()
+    portfolio.buy("FOO", 100, 1)
