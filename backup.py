@@ -237,10 +237,6 @@ def send_hello(): #MUST ISSUE FIRST!!
                        "type": "hello", \
                        "team": TEAM_NAME })
     s.send(request)
-    print "Sent request"
-    res = json.loads(s.recv())
-    print "Response:", res
-    return res
 
 
 if __name__ == '__main__':
