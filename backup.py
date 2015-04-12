@@ -521,6 +521,8 @@ if __name__ == '__main__':
             portfolio.handle_out(message)
 
         
+        print "Balance:", portfolio.balance
+        print "Market:", market
         print calc_pnl(portfolio, market)
 
 
