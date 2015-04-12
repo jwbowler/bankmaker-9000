@@ -135,7 +135,7 @@ class Portfolio(object):
         self.pending_orders = {}
 
     def __str__(self):
-        out = "BALANCE = " + str(self.balance)
+        out = "BALANCE = " + str(self.balance) + " "
         for symbol in SYMBOLS:
             out += symbol + ' = ' + str(self.positions[symbol]) + ', '
         return out
@@ -181,6 +181,7 @@ class Portfolio(object):
     def handle_fill(self, message):
         order_id = message['order_id']
 
+        print "PRICE:", message['price']
         if message['dir'] == 'BUY':
             self.balance -= message['price'] * message['size']
             self.positions[message['symbol']] += message['price'] * message['size']
@@ -245,6 +246,9 @@ class Order(object):
         # possible states: CREATED, ACKED, CANCELLING
         self.state = 'CREATED'
 
+    def __repr__(self):
+        return self.__str__()
+
     def handle_ack(self):
         self.state = 'ACKED'
 
@@ -259,6 +263,9 @@ class TradeOrder(Order):
         self.direction = direction
         self.price = price
         self.size = size
+
+    def __str__(self):
+        return str((self.symbol, self.direction, self.price, self.size))
 
     def get_json_request(self):
         request = jsonify({
@@ -300,18 +307,18 @@ class Strategy2(object):
         barBid = bar.best_bids[-1]
 
 
-        num_pending = self.portfolio.pending_orders
-        assert len(num_pending) <= 1
+        num_pending = len(self.portfolio.pending_orders)
+        assert num_pending <= 1
 
         if num_pending > 0:
             return
 
         size = 10
 
-        if corgeBid[0] - (0.3*fooAsk[0]+0.8*barAsk[0])>cost:
+        if corgeBid[0] - (0.3*fooAsk[0]+0.8*barAsk[0])> 0:
             self.portfolio.sell('CORGE', corgeBid[0], size)
 
-        elif (0.3*fooBid[0]+0.8*barBid[0]) - corgeAsk[0] > cost:
+        elif (0.3*fooBid[0]+0.8*barBid[0]) - corgeAsk[0] > 0:
             self.portfolio.buy('CORGE', corgeAsk[0], size)
 
 
@@ -375,6 +382,9 @@ class ConvertOrder(Order):
         self.symbol = 'CORGE'
         self.direction = direction
         self.size = size
+
+    def __str__(self):
+        return str(("CONVERT", self.direction, self.size))
 
     def get_json_request(self):
         request = jsonify({
@@ -461,7 +471,7 @@ if __name__ == '__main__':
     portfolio = Portfolio()
 
     market = Market(SYMBOLS)
-    strategy = Strategy(market, portfolio)
+    strategy = Strategy2(market, portfolio)
 
     def handle(message):
 
@@ -505,7 +515,8 @@ if __name__ == '__main__':
 
 
         print market
-
+        print portfolio
+        print portfolio.pending_orders
 
 #         # strategy.step()
 # #	pass
