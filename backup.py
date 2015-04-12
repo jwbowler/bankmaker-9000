@@ -31,8 +31,8 @@ class Stock(object):
         self.trades = []
 
         # lists of (price, size) tuples
-        self.best_bids = []
-        self.best_asks = []
+        self.best_bids = [(0, 0)]
+        self.best_asks = [(0, 0)]
 
         self.market_val = []    # current_val
         self.market_avg1 = []   # average_val
@@ -64,10 +64,11 @@ class Stock(object):
             assert False
 
 
-    def calc_liquidated_value(self, shares):
+    def calc_liquidated_value(self):
         value = 0
+        shares = portfolio.positions[self.symbol]
         if shares > 0:
-            for (price, size) in book.buy:
+            for (price, size) in self.book.buy:
                 if size < shares:
                     value += price * size
                     shares -= size
@@ -75,7 +76,7 @@ class Stock(object):
                     value += price * shares
                     break
         else:
-            for (price, size) in book.sell:
+            for (price, size) in self.book.sell:
                 if size < shares:
                     value -= price * size
                     shares -= size
@@ -133,6 +134,8 @@ class Portfolio(object):
         self.received_hello = False
         self.counter = 0
         self.pending_orders = {}
+        self.balance = 0
+        self.positions = None
 
     def __str__(self):
         out = "BALANCE = " + str(self.balance) + " "
@@ -181,7 +184,6 @@ class Portfolio(object):
     def handle_fill(self, message):
         order_id = message['order_id']
 
-        print "PRICE:", message['price']
         if message['dir'] == 'BUY':
             self.balance -= message['price'] * message['size']
             self.positions[message['symbol']] += message['size']
@@ -397,8 +399,14 @@ class ConvertOrder(Order):
 
 
 def calc_pnl(portfolio, stocks):
-    return portfolio.balance + sum([stock.get_liquidated_value() for stock in stocks])
-
+    if not portfolio.balance or not portfolio.positions:
+        return None
+    res = portfolio.balance
+    if portfolio.positions["CORGE"] > 0:
+        res += portfolio.positions["CORGE"]*market.stocks["CORGE"].best_bids[-1][0]
+    else:
+        res += portfolio.positions["CORGE"]*market.stocks["CORGE"].best_asks[-1][0]
+    return res
 
 class mysocket(object):
 
@@ -512,11 +520,12 @@ if __name__ == '__main__':
             print "OUT:", message
             portfolio.handle_out(message)
 
+        
+        print calc_pnl(portfolio, market)
 
 
-        print market
-        print portfolio
-        print portfolio.pending_orders
+
+        
 
 #         # strategy.step()
 # #	pass
