@@ -184,10 +184,10 @@ class Portfolio(object):
         print "PRICE:", message['price']
         if message['dir'] == 'BUY':
             self.balance -= message['price'] * message['size']
-            self.positions[message['symbol']] += message['price'] * message['size']
+            self.positions[message['symbol']] += message['size']
         if message['dir'] == 'SELL':
             self.balance += message['price'] * message['size']
-            self.positions[message['symbol']] -= message['price'] * message['size']
+            self.positions[message['symbol']] -= message['size']
 
     def handle_out(self, message):
         order_id = message['order_id']
